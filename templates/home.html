@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Infrastructure Maintenance</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Infrastructure Maintenance</h1>
+        <a href="/logout">Logout</a>
+    </header>
+    <section>
+        <h2>Role: {{ role }}</h2>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            {% if role == 'Admin' %}
+            <li><a href="/resource-scheduling">Resource & Budget Scheduling</a></li>
+            {% endif %}
+            <li><a href="/alerts">View Alerts</a></li>
+            <li><a href="/map">Map Display</a></li>
+        </ul>
+    </section>
+</body>
+</html>
