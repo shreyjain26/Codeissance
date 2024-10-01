@@ -19,8 +19,23 @@
             <li><a href="/resource-scheduling">Resource & Budget Scheduling</a></li>
             {% endif %}
             <li><a href="/alerts">View Alerts</a></li>
-            <li><a href="/map">Map Display</a></li>
+            <!-- <li><a href="/map">Map Display</a></li> -->
         </ul>
     </section>
+    <div id="chatbot"></div>
+        <div id="chatbot-header" onclick="toggleChatbot()">
+            <h3>Chatbot</h3>
+            <span id="close-btn">X</span>
+        </div>
+        <div id="chatbot-body">
+            <div id="chatbot-messages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div id="chatbot-input">
+                <input type="text" id="chatbot-input-field" placeholder="Type a message..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,4 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify
+import matplotlib.pyplot as plt
+import io
+import seaborn as sns
+import base64
+import pandas as pd
+from utils import call_gemini_api
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -8,6 +14,8 @@ users = {
     'fieldengineer@example.com': {'password': 'engineer123', 'role': 'Field Engineer'},
     'manager@example.com': {'password': 'manager123', 'role': 'Manager'}
 }
+
+rail = pd.read_csv(r"C:\Users\shery\Downloads\Railway_Infra_Final.csv")
 
 @app.route('/')
 def home():
@@ -51,9 +59,9 @@ def logout():
     session.pop('role', None)
     return redirect(url_for('login'))
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html', traffic_data="Traffic Data", weather_data="Weather Data")
+# @app.route('/dashboard')
+# def dashboard():
+#     return render_template('dashboard.html', traffic_data="Traffic Data", weather_data="Weather Data")
 
 @app.route('/alerts')
 def alerts():
@@ -72,6 +80,125 @@ def resource_scheduling():
         flash(f"Schedule submitted!\nResources: {resources}\nBudget: {budget}", 'success')
         return redirect(url_for('resource_scheduling'))
     return render_template('resource-scheduling.html')
+
+@app.route("/chatbot", methods=["POST"])
+def chatbot():
+    data = request.get_json()
+    user_message = data.get("message", "")
+
+    # Example OpenAI GPT-3.5 API call (you can modify this based on your chatbot logic)
+    openai.api_key = "YOUR_API_KEY"
+
+    response = openai.Completion.create(
+        engine="gpt-3.5-turbo",
+        prompt=f"User: {user_message}\nBot:",
+        max_tokens=150
+    )
+
+    bot_response = response.choices[0].text.strip()
+
+    # Send back the bot's response to the frontend
+    return jsonify({"response": bot_response})
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    # traffic_data = "Sample traffic data"
+    # weather_data = "Sample weather data"
+    
+    plot_url = None
+
+    # If a POST request is made (form submission), generate the selected plot
+    if request.method == 'POST':
+        plot_type = request.form.get('plot_type')
+        plot_url = generate_plot(plot_type)  # Generate the plot and get its base64 URL
+    
+    return render_template('dashboard.html', plot_url=plot_url)
+
+
+# @app.route('/generate_plot', methods=['POST'])
+def generate_plot(plot_type):
+    # plot_type = request.form.get('plot_type')
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    if plot_type == "defects":
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=rail, x='State', y='Defect_Count', estimator=sum, ci=None)
+        plt.title('State-wise Comparison of Defect Counts')
+        plt.xlabel('State')
+        plt.ylabel('Total Defect Count')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        # plt.show()
+
+    elif plot_type == 'traffic_infra':
+        plt.figure(figsize=(14, 6))
+        sns.lineplot(data=rail, x='Date', y='Traffic_Volume', hue='Infrastructure_Type', marker='o')
+        plt.title('Traffic Volume Over Time by Infrastructure Type')
+        plt.xlabel('TIme')
+        plt.ylabel('Traffic Volume')
+        plt.xticks([])
+        plt.legend(title='Infrastructure Type')
+        plt.tight_layout()
+        # plt.show()
+
+    elif plot_type == 'traffic_state':
+        plt.figure(figsize=(14, 6))
+        sns.lineplot(data=rail, x='Date', y='Traffic_Volume', hue='State', marker='o')
+        plt.title('Traffic Volume Over Time by Infrastructure Type')
+        plt.xlabel('TIme')
+        plt.ylabel('Traffic Volume')
+        plt.xticks([])
+        plt.legend(title='Infrastructure Type')
+        plt.tight_layout()
+        # plt.show()
+
+    elif plot_type == 'age_dist':
+        plt.figure(figsize=(12, 6))
+        sns.histplot(data=rail, x='Age', bins=30, kde=True)
+        plt.title('Distribution of Age of Infrastructure')
+        plt.xlabel('Age')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        # plt.show()
+
+    elif plot_type == "maintenance":
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=rail, x='State', y='Maintenance_Count', estimator=sum, ci=None)
+        plt.title('State-wise Comparison of Maintenance Counts')
+        plt.xlabel('State')
+        plt.ylabel('Total Maintenance Count')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        # plt.show()
+
+    elif plot_type == "failures":
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=rail, x='State', y='Failure_Count', estimator=sum, ci=None)
+        plt.title('State-wise Comparison of Failure Counts')
+        plt.xlabel('State')
+        plt.ylabel('Total Failure Count')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        # plt.show()
+
+    # Save plot to a BytesIO object and return it as a response
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    img_url = f"data:image/png;base64,{img_base64}"
+
+    return img_url
+
+def handle_message():
+    data = request.get_json() 
+    user_message = data.get('message')
+    response_message = call_gemini_api(user_message)
+    if response_message:
+        return jsonify({'response': response_message})
+    return jsonify({'error': 'Invalid data received'}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -60,3 +60,69 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+#chatbot {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    display: none;
+    flex-direction: column;
+}
+
+#chatbot-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+}
+
+#chatbot-body {
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+}
+
+#chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#chatbot-input {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+#chatbot-input input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#chatbot-input button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#chatbot-input button:hover {
+    background-color: #0056b3;
+}
+
+#close-btn {
+    float: right;
+    cursor: pointer;
+}
