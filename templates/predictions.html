@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Prediction</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Predict Maintenance Levels</h1>
+    </header>
+
+    <main>
+        <form action="/predict_maintenance" method="POST">
+            <label for="equipment_type">Equipment Type:</label>
+            <select id="equipment_type" name="equipment_type">
+                <option value="type1">Rail</option>
+                <option value="type2">Road</option>
+                <option value="type3">Dock</option>
+            </select>
+
+            <!-- <label for="equipment_name">Equipment Type:</label>
+            <select id="equipment_name" name="equipment_name">
+                {%if equip == 'Rail'%}
+                    <option value="type1">Bridge Track Platform</option>
+                {% endif %}
+                {%if equip == 'Rail'%}
+                    <option value="type1">Rail</option>
+                {% endif %}
+                {%if equip == 'Rail'%}
+                    <option value="type1">Rail</option>
+                {% endif %}
+            </select> -->
+
+            <label for="usage_time">Usage Time (in hours):</label>
+            <input type="number" id="usage_time" name="usage_time" min="0" required>
+
+            <label for="last_maintenance_date">Last Maintenance Date:</label>
+            <input type="date" id="last_maintenance_date" name="last_maintenance_date" required>
+
+            <label for="failure_history">Failure History (in past 12 months):</label>
+            <input type="number" id="failure_history" name="failure_history" min="0" required>
+
+            <label for="environmental_factors">Environmental Factors (1-10 scale):</label>
+            <input type="number" id="environmental_factors" name="environmental_factors" min="1" max="10" required>
+
+            <button type="submit">Predict Maintenance Level</button>
+        </form>
+
+        {% if prediction %}
+            <h3>Prediction Result: {{ prediction }}</h3>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Maintenance Predictor</p>
+    </footer>
+</body>
+</html>

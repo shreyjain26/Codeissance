@@ -4,7 +4,9 @@ import io
 import seaborn as sns
 import base64
 import pandas as pd
+import random
 from utils import call_gemini_api
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -81,24 +83,44 @@ def resource_scheduling():
         return redirect(url_for('resource_scheduling'))
     return render_template('resource-scheduling.html')
 
-@app.route("/chatbot", methods=["POST"])
-def chatbot():
-    data = request.get_json()
-    user_message = data.get("message", "")
+@app.route('/predictions')
+def maintenance_prediction_form():
+    return render_template('predictions.html')
 
-    # Example OpenAI GPT-3.5 API call (you can modify this based on your chatbot logic)
-    openai.api_key = "YOUR_API_KEY"
+# Route to handle prediction logic
+@app.route('/predict_maintenance', methods=['POST'])
+def predict_maintenance():
+    # Get form data
+    equipment_type = request.form.get('equipment_type')
+    usage_time = int(request.form.get('usage_time'))
+    last_maintenance_date = request.form.get('last_maintenance_date')
+    failure_history = int(request.form.get('failure_history'))
+    environmental_factors = int(request.form.get('environmental_factors'))
 
-    response = openai.Completion.create(
-        engine="gpt-3.5-turbo",
-        prompt=f"User: {user_message}\nBot:",
-        max_tokens=150
-    )
+    # Simulate a prediction (replace this with real ML model prediction logic)
+    maintenance_level = random.choice(['Low', 'Moderate', 'High'])
 
-    bot_response = response.choices[0].text.strip()
+    # Render the form again and display the prediction
+    return render_template('predictions.html', prediction=maintenance_level)
 
-    # Send back the bot's response to the frontend
-    return jsonify({"response": bot_response})
+# @app.route("/chatbot", methods=["POST"])
+# def chatbot():
+#     data = request.get_json()
+#     user_message = data.get("message", "")
+
+#     # Example OpenAI GPT-3.5 API call (you can modify this based on your chatbot logic)
+#     openai.api_key = "YOUR_API_KEY"
+
+#     response = openai.Completion.create(
+#         engine="gpt-3.5-turbo",
+#         prompt=f"User: {user_message}\nBot:",
+#         max_tokens=150
+#     )
+
+#     bot_response = response.choices[0].text.strip()
+
+#     # Send back the bot's response to the frontend
+#     return jsonify({"response": bot_response})
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -106,20 +128,38 @@ def dashboard():
     # weather_data = "Sample weather data"
     
     plot_url = None
+    response = None
 
     # If a POST request is made (form submission), generate the selected plot
     if request.method == 'POST':
         plot_type = request.form.get('plot_type')
-        plot_url = generate_plot(plot_type)  # Generate the plot and get its base64 URL
+        plot_url, response = generate_plot(plot_type)  # Generate the plot and get its base64 URL
     
-    return render_template('dashboard.html', plot_url=plot_url)
+    return render_template('dashboard.html', plot_url=plot_url, response = response)
 
 
 # @app.route('/generate_plot', methods=['POST'])
 def generate_plot(plot_type):
     # plot_type = request.form.get('plot_type')
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # fig, ax = plt.subplots(figsize=(10, 6))
+    df = rail
+
+    if plot_type == 'life':
+        plt.figure(figsize=(12, 6))
+        start_percentage = 0
+        # if 
+        life_data = df['Life_Left_Percentage'].sort_values()
+
+    # Filter to show 10 at a time
+        # filtered_data = life_data[(life_data >= start_percentage) & (life_data < start_percentage + 10)]
+        
+        sns.barplot(life_data, color='purple', edgecolor='black')
+        plt.title(f'Health Life Plot ({start_percentage}-{start_percentage+10}% Life Left)')
+        plt.xlabel('Life Left Percentage')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+
     
     if plot_type == "defects":
         plt.figure(figsize=(12, 6))
@@ -185,12 +225,17 @@ def generate_plot(plot_type):
     # Save plot to a BytesIO object and return it as a response
     img = io.BytesIO()
     plt.savefig(img, format='png')
+    myfile = genai.upload_file(media / "plot.jpg")
+
     img.seek(0)
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    img = img.getvalue()
     img_url = f"data:image/png;base64,{img_base64}"
+    response = call_gemini_api("Understand the graph thoroughly and provide relevant inferences.", img)
 
-    return img_url
+    return img_url, response
 
+@app.route('/chatbot', methods=['POST'])
 def handle_message():
     data = request.get_json() 
     user_message = data.get('message')

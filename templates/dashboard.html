@@ -25,6 +25,7 @@
             <label for="plot_type">Choose a plot:</label>
             <select id="plot_type" name="plot_type">
                 <option value="traffic_infra">Infrastructure-wise Traffic Comparison</option>
+                <option value="life">Infrastructure Life Percentage</option>
                 <option value="traffic_state">State-wise Traffic Comparison</option>
                 <option value="age_dist">Distribution of Age</option>
                 <option value="defects">State-wise Defect Comparison</option>
@@ -39,24 +40,10 @@
         {% if plot_url %}
             <h2>Generated Plot:</h2>
             <img src="{{ plot_url }}" alt="Generated Plot" />
+            <h4>Inference</h4>
+            <p>"{{ response }}"</p>
         {% endif %}
     </section>
     
-
-    <!-- <div id="chatbot"></div>
-        <div id="chatbot-header" onclick="toggleChatbot()">
-            <h3>Chatbot</h3>
-            <span id="close-btn">X</span>
-        </div>
-        <div id="chatbot-body">
-            <div id="chatbot-messages">
-                Chat messages will appear here
-            </div>
-            <div id="chatbot-input">
-                <input type="text" id="chatbot-input-field" placeholder="Type a message..." />
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-    </div> -->
 </body>
 </html>
