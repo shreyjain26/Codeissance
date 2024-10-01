@@ -223,17 +223,12 @@ def generate_plot(plot_type):
         # plt.show()
 
     # Save plot to a BytesIO object and return it as a response
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    myfile = genai.upload_file(media / "plot.jpg")
+    # img = io.BytesIO()
+    url = 'static/images/plot.png'
+    plt.savefig(url)
+    response = call_gemini_api("Understand the graph thoroughly and provide relevant inferences. Recommend some actions to be taken. If there are state mentioned, based on the plot data, rcommend which states should be given priority for resource allocation", url)
 
-    img.seek(0)
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    img = img.getvalue()
-    img_url = f"data:image/png;base64,{img_base64}"
-    response = call_gemini_api("Understand the graph thoroughly and provide relevant inferences.", img)
-
-    return img_url, response
+    return url, response
 
 @app.route('/chatbot', methods=['POST'])
 def handle_message():

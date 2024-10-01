@@ -18,7 +18,8 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 
 def call_gemini_api(prompt,img,  max_tokens=500, temperature=0.5):
     # print(img)
-    img = base64.b64encode(img).decode('utf-8')
+    # img = base64.b64encode(img).decode('utf-8')
+    img = Image.open(img)
     response = model.generate_content(
         contents=[img, prompt],
         # stream=True,
